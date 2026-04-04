@@ -1,0 +1,29 @@
+{
+  "_comment": "ChatGPT Custom Action configuration. Use this JSON when creating a GPT action in the OpenAI platform.",
+  "schema_source": "openapi_action.yaml",
+  "setup_instructions": {
+    "step_1": "Start Background Remover Studio API: BackgroundRemoverStudio.exe --api",
+    "step_2": "Expose the local server publicly using a tunnel (ngrok, Cloudflare Tunnel, etc.): ngrok http 8000",
+    "step_3": "In ChatGPT GPT editor → Actions → Add action → import openapi_action.yaml",
+    "step_4": "Replace 'http://localhost:8000' in the server URL with your tunnel URL",
+    "note": "For local use only (same machine), a public tunnel is not needed. The GPT can call localhost directly only if running in a local ChatGPT-compatible client."
+  },
+  "authentication": {
+    "type": "none",
+    "note": "The API has no authentication by default. Add an API key header if exposing publicly."
+  },
+  "privacy_policy": "https://github.com/sabnck/background-remover-studio#privacy",
+  "actions": [
+    {
+      "name": "removeBackground",
+      "description": "Remove the background from an image. Send the image as base64, get back a transparent PNG.",
+      "endpoint": "POST /api/remove-background",
+      "content_type": "application/json"
+    },
+    {
+      "name": "checkHealth",
+      "description": "Check if the Background Remover Studio API is running.",
+      "endpoint": "GET /api/health"
+    }
+  ]
+}

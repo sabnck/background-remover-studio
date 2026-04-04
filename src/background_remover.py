@@ -1320,7 +1320,8 @@ class App(TK_ROOT):
         self.geometry(f"{default_w}x{default_h}")
         self.minsize(min(default_w, 980), min(default_h, 660))
 
-        icon_path = Path(__file__).parent / "icon.ico"
+        from _paths import resource as _resource
+        icon_path = _resource("icon.ico")
         if icon_path.exists():
             try: self.iconbitmap(str(icon_path))
             except: pass

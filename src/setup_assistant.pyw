@@ -518,12 +518,11 @@ class Assistant(tk.Tk):
             w.bind("<Leave>", _card_leave)
             w.bind("<Button-1>", lambda e: _do_launch())
 
-        # — Web UI card (coming soon) ——————————
+        # — Web UI card (coming soon) ————————————————————————
         DIMMED_BG = "#0D1117"
         web = tk.Frame(row, bg=DIMMED_BG, padx=20, pady=20,
                        highlightthickness=2, highlightbackground=BORDER)
         web.grid(row=0, column=1, sticky="nsew", padx=(8, 0))
-
         tk.Label(web, text=self.t("launch_web"),
                  bg=DIMMED_BG, fg=MUTED, font=("Segoe UI", 12, "bold")).pack(anchor="w")
         tk.Label(web, text=self.t("launch_web_sub"),

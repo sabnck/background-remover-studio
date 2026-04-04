@@ -16,14 +16,18 @@ env/
 # Build / packaging
 build/
 dist/
+release/
 *.egg-info/
+
+# Portable zip (temp artifact)
+BackgroundRemoverStudio-portable.zip
 
 # OS files
 Thumbs.db
 .DS_Store
 desktop.ini
 
-# Auto-generated shortcut with custom icon (created by start.vbs on first run)
+# Auto-generated shortcuts
 *.lnk
 
 # App outputs — never commit processed images

@@ -1,0 +1,44 @@
+{
+  "name": "remove_background",
+  "description": "Remove the background from an image using Background Remover Studio running locally on the user's machine. The API server must be started first (BackgroundRemoverStudio.exe --api). All processing happens locally — no data is sent to any external server. Returns a base64-encoded PNG with the background removed and transparent areas.",
+  "input_schema": {
+    "type": "object",
+    "required": ["image_base64"],
+    "properties": {
+      "image_base64": {
+        "type": "string",
+        "description": "Base64-encoded image to process. Accepts raw base64 or a data URI prefix (data:image/png;base64,...). Supports JPG, PNG, WebP, BMP, and TIFF."
+      },
+      "filename": {
+        "type": "string",
+        "description": "Original filename of the image (used only to name the output). Example: product_photo.jpg",
+        "default": "image.png"
+      },
+      "output": {
+        "type": "string",
+        "description": "Output image format: png (default, transparent), webp (transparent), or jpg (white background).",
+        "enum": ["png", "webp", "jpg"],
+        "default": "png"
+      },
+      "white_threshold": {
+        "type": "integer",
+        "description": "Sensitivity for light or white backgrounds (180–255). Higher values remove more pixels near white. Default 225 works well for most images.",
+        "minimum": 180,
+        "maximum": 255,
+        "default": 225
+      },
+      "edge_cleanup": {
+        "type": "integer",
+        "description": "Edge erosion strength (0–8). Use 1–3 to clean up fringe pixels at the border of the cutout. 0 disables erosion (default).",
+        "minimum": 0,
+        "maximum": 8,
+        "default": 0
+      },
+      "hair_protect": {
+        "type": "boolean",
+        "description": "Preserve fine hair and fur details. Recommended for portraits and animal photos. Default true.",
+        "default": true
+      }
+    }
+  }
+}

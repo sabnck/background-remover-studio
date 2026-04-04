@@ -1,0 +1,217 @@
+openapi: "3.1.0"
+
+info:
+  title: Background Remover Studio API
+  description: >
+    Local background removal API. Processes images on the user's machine —
+    no cloud upload, no limits, no account required.
+    The server must be running locally before using this action.
+    Start it with: BackgroundRemoverStudio.exe --api
+  version: "1.1.0"
+  contact:
+    name: Henrique Fernandes
+    url: https://github.com/sabnck/background-remover-studio
+
+servers:
+  - url: http://localhost:8000
+    description: Local instance (default port)
+
+paths:
+  /api/health:
+    get:
+      operationId: checkHealth
+      summary: Check if the API server is running
+      description: Returns 200 OK when the Background Remover Studio API is up.
+      responses:
+        "200":
+          description: API is running
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  app:
+                    type: string
+                    example: "Background Remover Studio API"
+                  version:
+                    type: string
+                    example: "1.1.0"
+
+  /api/info:
+    get:
+      operationId: getApiInfo
+      summary: Get API capabilities and schema information
+      description: Returns a description of all endpoints and supported formats.
+      responses:
+        "200":
+          description: API capabilities
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/remove-background:
+    post:
+      operationId: removeBackground
+      summary: Remove the background from an image
+      description: >
+        Accepts a base64-encoded image and returns the result with the background removed.
+        The response contains a base64-encoded PNG (or WebP/JPG) with processing metadata.
+        All processing happens locally — no data is sent to any external server.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RemoveBackgroundRequest"
+            examples:
+              basic:
+                summary: Basic PNG removal
+                value:
+                  image_base64: "<base64-encoded image data>"
+                  output: "png"
+                  response_format: "json"
+              precise:
+                summary: With edge cleanup for clean cutout
+                value:
+                  image_base64: "<base64-encoded image data>"
+                  output: "png"
+                  edge_cleanup: 2
+                  hair_protect: true
+                  response_format: "json"
+      responses:
+        "200":
+          description: >
+            Background removed successfully.
+            When response_format=json (recommended for tool use), returns a JSON object.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RemoveBackgroundResponse"
+        "400":
+          description: Invalid input (bad image data, missing fields, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    RemoveBackgroundRequest:
+      type: object
+      required:
+        - image_base64
+      properties:
+        image_base64:
+          type: string
+          description: >
+            Base64-encoded image to process.
+            Accepts raw base64 or a data URI (data:image/png;base64,...).
+          example: "iVBORw0KGgoAAAANSUhEUgAA..."
+        filename:
+          type: string
+          description: Original filename (used only to name the output).
+          default: "image.png"
+          example: "product_photo.jpg"
+        output:
+          type: string
+          description: Output image format.
+          enum: ["png", "webp", "jpg"]
+          default: "png"
+        white_threshold:
+          type: integer
+          description: >
+            Sensitivity for light/white backgrounds (180–255).
+            Higher values remove more of the background near white.
+          minimum: 180
+          maximum: 255
+          default: 225
+        edge_cleanup:
+          type: integer
+          description: >
+            Edge erosion strength (0–8). Use 1–3 to remove fringe pixels
+            around the cutout. 0 disables erosion.
+          minimum: 0
+          maximum: 8
+          default: 0
+        hair_protect:
+          type: boolean
+          description: >
+            Preserve fine hair and fur details when removing the background.
+            Recommended for portraits and animals.
+          default: true
+        response_format:
+          type: string
+          description: >
+            Response format. Use "json" for tool/function-calling use cases
+            (returns base64 + metadata). Use "image" for direct binary download.
+          enum: ["json", "image"]
+          default: "json"
+
+    RemoveBackgroundResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        image:
+          type: object
+          description: The processed image with background removed.
+          properties:
+            data:
+              type: string
+              description: Base64-encoded image data.
+              example: "iVBORw0KGgoAAAANSUhEUgAA..."
+            format:
+              type: string
+              example: "png"
+            media_type:
+              type: string
+              example: "image/png"
+            width:
+              type: integer
+              example: 1920
+            height:
+              type: integer
+              example: 1080
+        source:
+          type: object
+          description: Metadata about the original input image.
+          properties:
+            filename:
+              type: string
+              example: "product_photo.jpg"
+            width:
+              type: integer
+              example: 1920
+            height:
+              type: integer
+              example: 1080
+        processing:
+          type: object
+          description: Parameters used during processing.
+          properties:
+            white_threshold:
+              type: integer
+              example: 225
+            edge_cleanup:
+              type: integer
+              example: 0
+            hair_protect:
+              type: boolean
+              example: true
+            mode:
+              type: string
+              description: '"photo" for photographs, "artwork" for logos and illustrations.'
+              enum: ["photo", "artwork"]
+              example: "photo"
+
+    ErrorResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+          example: "Invalid or unreadable image file."
